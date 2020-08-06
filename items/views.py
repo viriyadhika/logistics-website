@@ -43,7 +43,4 @@ class ItemUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'item_update.html'
     fields = ['name', 'desc', 'quantity']
 
-def item_search_view(request):
-    searched_item =Item.objects.filter(name__contains=)
-
 # Create your views here.
