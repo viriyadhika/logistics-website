@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     #Local
     'users.apps.UsersConfig',
     'pages.apps.PagesConfig',
+    'items.apps.ItemsConfig',
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,9 @@ DATABASES = {
 }
 
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
+
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -109,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'users.User'
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'items_list'
 LOGOUT_REDIRECT_URL = 'home'
 
 

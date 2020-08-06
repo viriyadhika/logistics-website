@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ user }}'s items{% endblock title %}
+
+{% block content %}
+    {% for item in items_list %}
+    <div class="card">
+        <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
+        <div class="card-body">
+            <a href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
+            <p>{{ item.desc }}</p>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'item_update' item.pk %}" class="btn" role="button">Edit</a>
+            <a href="{% url 'item_delete' item.pk %}" class="btn" role="button">Delete</a>
+        </div>
+    </div>
+    </br>
+    {% endfor %}
+
+{% endblock content %}
