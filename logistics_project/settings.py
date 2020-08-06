@@ -140,15 +140,12 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
-=======
+
 AUTH_USER_MODEL = 'users.User'
 
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'items_list'
 LOGOUT_REDIRECT_URL = 'home'
->>>>>>> 13918ce
-=======
+
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
->>>>>>> 0e3557
