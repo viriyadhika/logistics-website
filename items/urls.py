@@ -5,6 +5,9 @@ from .views import (
     ItemDetailView,
     ItemUpdateView,
     my_item_list,
+    item_search_view,
+    ItemBorrowView,
+    item_borrowed_view,
 )
 
 urlpatterns = [
@@ -12,6 +15,9 @@ urlpatterns = [
     path('new/', ItemCreateView.as_view(), name='item_new'),
     path('<int:pk>/update/', ItemUpdateView.as_view(), name='item_update'),
     path('<int:pk>/delete/', ItemDeleteView.as_view(), name='item_delete'),
-    path('<int:pk>/', ItemDetailView.as_view(), name='item_detail')
+    path('<int:pk>/', ItemDetailView.as_view(), name='item_detail'),
+    path('search/', item_search_view, name='item_search_result'),
+    path('<int:pk>/borrow', ItemBorrowView.as_view(), name='item_borrow'),
+    path('borrowed/', item_borrowed_view, name='item_borrowed')
 ]
 

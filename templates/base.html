@@ -24,12 +24,24 @@
             <ul class="navbar-nav" ml-auto>
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a href="{% url 'item_new' %}" class = "nav-link" role="button">+ New Item</a>
+                    <a href="{% url 'item_new' %}" class = "nav-link" role="button">New Item</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'items_list' %}" class="nav-link" role="button">My Items</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'item_borrowed' %}" class="nav-link" role="button">Currently Borrowed</a>
                 </li>
                 {% endif %}
             </ul>
             
             <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <form action="{% url 'item_search_result' %}" method="GET">
+                        <input name='search_query' type="text" placeholder="Search Item">
+                    </form>
+                </li>
+
                 {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -61,7 +73,7 @@
 
     
     
-    <div class="container">
+    <div class="container py-3">
         {% block content %}
         {% endblock content %}
     </div>

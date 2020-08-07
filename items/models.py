@@ -8,7 +8,15 @@ class Item(models.Model):
     quantity = models.IntegerField()
     owner = models.ForeignKey(
         get_user_model(),
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='item_owned'
+    )
+    borrower = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='item_borrowed',
+        null=True,
+        blank=True,
     )
 
     def __str__(self):

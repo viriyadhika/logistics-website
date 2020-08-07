@@ -4,11 +4,15 @@
 
 
 {% block content %}
-{% if user.is_authenticated %}
-    <h1>Home!</h1>
-{% else %}
-    <h1>Not Home!</h1>
-{% endif %}
+    <div class="jumbotron">
+        <h2>Welcome to Logistics Website!</h2>
+        <p>To start you can take a look at your items</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'items_list' %}" class="btn btn-success" role="button">Get Started</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-success" role="button">Get Started</a>
+        {% endif %}
+    </div>
 
 {% endblock content %}
 

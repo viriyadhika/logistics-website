@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Items Borrowed{% endblock title %}
+
+
+    
+{% block content %}
+    {% for item in items_list %}
+        <div class="card">
+            <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
+            <div class="card-body d-flex flex-row align items-start">
+                <div class="d-flex flex-column">
+                    <a  href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
+                    <p class="text-muted">Borrowed from {{ item.owner }}</p>
+                    <p>{{ item.desc }}</p>
+                </div>
+            </div>
+        </div>
+        </br>
+    {% endfor %}
+    
+{% endblock content %}

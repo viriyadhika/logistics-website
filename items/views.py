@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
+from django.http import HttpResponseForbidden
+
 
 from .models import Item
 
@@ -31,16 +34,57 @@ class ItemCreateView(LoginRequiredMixin, CreateView):
         form.instance.owner = self.request.user
         return super().form_valid(form)
 
-class ItemDeleteView(LoginRequiredMixin, DeleteView):
+class ItemDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Item
     context_object_name = 'item'
     template_name = 'item_delete.html'
     success_url = reverse_lazy('items_list')
+    def test_func(self):
+        return self.request.user == self.get_object().owner
 
-class ItemUpdateView(LoginRequiredMixin, UpdateView):
+class ItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     context_object_name = 'item'
     model = Item
     template_name = 'item_update.html'
     fields = ['name', 'desc', 'quantity']
+
+    def test_func(self):
+        return self.request.user == self.get_object().owner
+
+def item_search_view(request):
+    search_query = request.GET.get('search_query')
+    if request.user.is_authenticated:
+        result = Item.objects.filter(
+                name__contains=search_query
+            ).exclude(
+                owner=request.user
+            ).filter(
+                borrower=None
+            )
+    else:
+        result = Item.objects.filter(
+            Q(name__contains=search_query)
+            ).filter(
+                borrower=None
+            )
+
+    return render(request, 'item_search.html', {'items_list' : result, 'items_count' : result.count(), 'query' : search_query})
+
+class ItemBorrowView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Item 
+    context_object_name = 'item'
+    fields = []
+    template_name = 'item_borrow.html'
+    def test_func(self):
+        return self.request.user != self.get_object().owner
+    def form_valid(self, form):
+        form.instance.borrower = self.request.user
+        return super().form_valid(form)
+
+def item_borrowed_view(request):
+    result = Item.objects.filter(
+        borrower=request.user
+    )
+    return render(request, 'item_borrowed.html', {'items_list' : result})
 
 # Create your views here.

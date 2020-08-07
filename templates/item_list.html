@@ -2,7 +2,13 @@
 
 {% block title %}{{ user }}'s items{% endblock title %}
 
+<div class="container">
+{% block search_result %}
+{% endblock search_result %}
+</div>
+
 {% block content %}
+    <h2>My Items</h2>
     {% for item in items_list %}
     <div class="card">
         <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
