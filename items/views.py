@@ -11,7 +11,11 @@ from .models import Item
 
 def my_item_list(request):
     if request.user.is_authenticated:
-        all_items = Item.objects.filter(owner = request.user)
+        all_items = Item.objects.filter(
+            owner = request.user
+            ).order_by(
+                'borrower'
+            )
         return render(request, 'item_list.html', {'items_list': all_items})
     else:
         return redirect(reverse_lazy('login'))
@@ -53,19 +57,15 @@ class ItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 def item_search_view(request):
     search_query = request.GET.get('search_query')
-    if request.user.is_authenticated:
-        result = Item.objects.filter(
-                name__contains=search_query
-            ).exclude(
-                owner=request.user
+    result = Item.objects.filter(
+        Q(name__contains=search_query)
             ).filter(
                 borrower=None
             )
-    else:
-        result = Item.objects.filter(
-            Q(name__contains=search_query)
-            ).filter(
-                borrower=None
+
+    if request.user.is_authenticated:
+        result = result.exclude(
+                owner=request.user
             )
 
     return render(request, 'item_search.html', {'items_list' : result, 'items_count' : result.count(), 'query' : search_query})

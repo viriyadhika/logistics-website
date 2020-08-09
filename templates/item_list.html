@@ -14,6 +14,11 @@
         <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
         <div class="card-body">
             <a href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
+            {% if item.borrower %}
+            <p class="text-danger">Status: Borrowed by {{ item.borrower }}</p>
+            {% else %}
+            <p class="text-success">Status: Available</p>
+            {% endif %}
             <p>{{ item.desc }}</p>
         </div>
         <div class="card-footer">
