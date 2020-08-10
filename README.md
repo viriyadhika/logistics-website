@@ -2,4 +2,4 @@ A website to track borrowing of items/logistics based on Django back end. A user
 
 ## Running Website
 The website is to be accessed in
-[here] (http://herokuapp.com)
+[here](https://herokuapp.com)
