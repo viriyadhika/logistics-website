@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Return - {{ item.name }}{% endblock title %}
+
+{% block content %}
+    
+    <h2>Mark {{ item.borrower }} has returned the item?</h2>
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-danger">Mark as Returned</button>
+    </form>
+    
+
+{% endblock content %}
+

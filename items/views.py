@@ -81,6 +81,17 @@ class ItemBorrowView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form.instance.borrower = self.request.user
         return super().form_valid(form)
 
+class ItemReturnView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Item
+    context_object_name = 'item'
+    fields = []
+    template_name = 'item_return.html'
+    def test_func(self):
+        return self.request.user == self.get_object().owner and self.get_object().borrower != None
+    def form_valid(self, form):
+        form.instance.borrower = None
+        return super().form_valid(form)
+
 def item_borrowed_view(request):
     result = Item.objects.filter(
         borrower=request.user

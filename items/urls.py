@@ -8,6 +8,7 @@ from .views import (
     item_search_view,
     ItemBorrowView,
     item_borrowed_view,
+    ItemReturnView,
 )
 
 urlpatterns = [
@@ -18,6 +19,7 @@ urlpatterns = [
     path('<int:pk>/', ItemDetailView.as_view(), name='item_detail'),
     path('search/', item_search_view, name='item_search_result'),
     path('<int:pk>/borrow', ItemBorrowView.as_view(), name='item_borrow'),
-    path('borrowed/', item_borrowed_view, name='item_borrowed')
+    path('borrowed/', item_borrowed_view, name='item_borrowed'),
+    path('<int:pk>/return', ItemReturnView.as_view(), name='item_return')
 ]
 
