@@ -3,10 +3,24 @@
 {% block title %}Update Item - {{ item.name }}{% endblock title %}
 
 {% block content %}
+    {% if item.borrower %}
+    <p>Are you sure you want to delete {{ item.name }}?</p>
+    <p> {{ item.borrower }} is currently borrowing it. All borrowing records will be deleted upon item deletion.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-danger" type="submit">Delete</button>
+    </form>
+
+    {% else %}
+
     <form method="POST">
         {% csrf_token %}
         <p>Are you sure you want to delete {{ item.name }}?</p>
         <button class="btn btn-danger" type="submit">Delete</button>
     </form>
+
+    {% endif %}
 
 {% endblock content %}

@@ -34,6 +34,8 @@
         </div>
     </div>
     </br>
+    {% empty %}
+    <p>You don't have any item. <a href="{% url 'item_new' %}">Add an item</a> to begin lending your unused items!</p>
     {% endfor %}
 
 {% endblock content %}
