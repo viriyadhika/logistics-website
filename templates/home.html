@@ -6,7 +6,8 @@
 {% block content %}
     <div class="jumbotron">
         <h2>Welcome to Logistics Website!</h2>
-        <p>To start you can take a look at your items</p>
+        <p>Here, you can borrow others' unused items and lend yours as well!</p>
+        <p>To start, for example, type "Laptop" in the search bar</p>
         {% if user.is_authenticated %}
         <a href="{% url 'items_list' %}" class="btn btn-success" role="button">Get Started</a>
         {% else %}
