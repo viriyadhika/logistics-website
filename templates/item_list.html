@@ -29,7 +29,14 @@
             {% endif %}
         </div>
         <div class="card-footer">
+            {% if item.borrower %}
+            <a href="" class="btn dummy-update-button" role="button"
+                onclick="alert('You cant update an item that is currently being borrowed')" role="button">
+                Edit
+            </a>
+            {% else %}
             <a href="{% url 'item_update' item.pk %}" class="btn" role="button">Edit</a>
+            {% endif %}
             <a href="{% url 'item_delete' item.pk %}" class="btn" role="button">Delete</a>
         </div>
     </div>
@@ -37,5 +44,4 @@
     {% empty %}
     <p>You don't have any item. <a href="{% url 'item_new' %}">Add an item</a> to begin lending your unused items!</p>
     {% endfor %}
-
 {% endblock content %}

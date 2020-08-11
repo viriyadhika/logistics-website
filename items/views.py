@@ -53,7 +53,7 @@ class ItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     fields = ['name', 'desc', 'quantity']
 
     def test_func(self):
-        return self.request.user == self.get_object().owner
+        return self.request.user == self.get_object().owner and self.get_object().borrower == None
 
 def item_search_view(request):
     search_query = request.GET.get('search_query')
