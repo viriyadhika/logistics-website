@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
@@ -6,8 +6,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
 from django.http import HttpResponseForbidden
 
-
-from .models import Item
+from .forms import BorrowForm
+from .models import Item, Borrow
 
 def my_item_list(request):
     if request.user.is_authenticated:
@@ -70,8 +70,33 @@ def item_search_view(request):
 
     return render(request, 'item_search.html', {'items_list' : result, 'items_count' : result.count(), 'query' : search_query})
 
+def item_borrow_view(request, pk):
+    template_name = 'item_borrow.html'
+    
+
+    if (request.user.is_authenticated):
+        return redirect(reverse_lazy('login'))
+
+    item = Item.objects.get(pk = pk)
+    if (request.user == item.owner):
+        return HttpResponseForbidden()
+
+    if request.method == 'POST':
+        form = BorrowForm
+        if form.is_valid():
+            new_borrow = Borrow(
+                quantity=1, 
+                borrower=request.user,
+                item_borrowed=item,
+            )
+            new_borrow.save()
+
+    return render(request, template_name, {'form': form})
+
+
+
 class ItemBorrowView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Item 
+    model = Borrow 
     context_object_name = 'item'
     fields = []
     template_name = 'item_borrow.html'
