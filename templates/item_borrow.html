@@ -3,7 +3,8 @@
 {% block title %}Borrow Item - {{ item.name }}{% endblock title %}
 
 {% block content %}
-    <h2>Are you sure that you want to borrow {{ item.name }}?</h2>
+    <h2>Specify borrowing detail of item {{ item.name }}</h2>
+
     <form method="POST">
         {% csrf_token %}
         {{ form.as_p }}

@@ -12,6 +12,7 @@ pillow = "*"
 python-decouple = "*"
 gunicorn = "*"
 boto = "*"
+django-tempus-dominus = "*"
 
 [requires]
 python_version = "3.8"

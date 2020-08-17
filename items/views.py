@@ -98,15 +98,18 @@ def item_borrow_view(request, pk):
     if request.method == 'POST':
         form = form(request.POST)
         if form.is_valid():
+            print(form.cleaned_data['return_date'], 'hello')
             new_borrow = Borrow(
-                quantity=1, 
+                quantity=form.cleaned_data['quantity'], 
+                return_date=form.cleaned_data['return_date'],
                 borrower=request.user,
                 item_borrowed=item,
             )
             new_borrow.save()
         return redirect(reverse_lazy('items_list'))
     template_name = 'item_borrow.html'
-    
+
+
     return render(request, template_name, {'form': form, 'item' : item})
 
 
