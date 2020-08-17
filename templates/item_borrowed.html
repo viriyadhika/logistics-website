@@ -5,14 +5,14 @@
 
     
 {% block content %}
-    {% for item in items_list %}
+    {% for borrow_record in borrow_list %}
         <div class="card">
             <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
             <div class="card-body d-flex flex-row align items-start">
                 <div class="d-flex flex-column">
-                    <a  href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
-                    <p class="text-muted">Borrowed from {{ item.owner }}</p>
-                    <p>{{ item.desc }}</p>
+                    <a  href="{% url 'item_detail' borrow_record.item_borrowed.pk %}"><h4>{{ borrow_record.item_borrowed.name }}</h4></a>
+                    <p class="text-muted">Borrowed from {{ borrow_record.item_borrowed.owner }}</p>
+                    <p>{{ borrow_record.item_borrowed.desc }}</p>
                 </div>
             </div>
         </div>

@@ -11,13 +11,7 @@ class Item(models.Model):
         on_delete=models.CASCADE,
         related_name='item_owned'
     )
-    borrower = models.ForeignKey(
-        get_user_model(),
-        on_delete=models.CASCADE,
-        related_name='item_borrowed',
-        null=True,
-        blank=True,
-    )
+
 
     def __str__(self):
         return self.name
@@ -34,6 +28,7 @@ class Borrow(models.Model):
     item_borrowed = models.ForeignKey(
         Item,
         on_delete=models.CASCADE,
+        related_query_name='item_borrow_record'
     )
 
     borrow_date = models.DateField(

@@ -1,4 +1,4 @@
-from django import forms
+from django.forms import Form
 from .models import Borrow
 
 class BorrowForm(Form):

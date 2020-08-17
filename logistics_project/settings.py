@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'pages.apps.PagesConfig',
     'items.apps.ItemsConfig',
-    'borrow.apps.BorrowConfig',
 ]
 
 MIDDLEWARE = [

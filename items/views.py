@@ -11,12 +11,29 @@ from .models import Item, Borrow
 
 def my_item_list(request):
     if request.user.is_authenticated:
-        all_items = Item.objects.filter(
+        my_items = Item.objects.filter(
             owner = request.user
-            ).order_by(
-                'borrower'
             )
-        return render(request, 'item_list.html', {'items_list': all_items})
+        
+        my_items_id = my_items.values_list(
+                'pk', flat=True
+            )
+
+        all_item_borrowed = Borrow.objects.filter(
+            item_borrowed__in = my_items_id
+        )
+
+        borrowed_objects = all_item_borrowed.select_related(
+                'item_borrowed'
+            )
+        print(borrowed_objects.query)
+
+        available_items = my_items.filter(
+            item_borrow_record__isnull=True
+        )
+        print(available_items.query)
+        
+        return render(request, 'item_list.html', {'items_list': available_items, 'borrowed_item' : borrowed_objects})
     else:
         return redirect(reverse_lazy('login'))
 
@@ -24,11 +41,6 @@ class ItemDetailView(LoginRequiredMixin, DetailView):
     context_object_name = 'item'
     model = Item
     template_name = 'item_detail.html'
-
-class ItemListView(LoginRequiredMixin, ListView):
-    model = Item
-    template_name = 'item_list.html'
-    context_object_name = 'items_list'
 
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
@@ -53,15 +65,20 @@ class ItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     fields = ['name', 'desc', 'quantity']
 
     def test_func(self):
-        return self.request.user == self.get_object().owner and self.get_object().borrower == None
+        num_of_item_borrow_rec = Borrow.objects.filter(
+            item_borrowed=self.get_object()
+        ).count()
+
+        return self.request.user == self.get_object().owner and num_of_item_borrow_rec == 0
 
 def item_search_view(request):
     search_query = request.GET.get('search_query')
+    
     result = Item.objects.filter(
         Q(name__contains=search_query)
-            ).filter(
-                borrower=None
-            )
+        ).exclude(
+            item_borrow_record__isnull=False
+        )
 
     if request.user.is_authenticated:
         result = result.exclude(
@@ -71,18 +88,17 @@ def item_search_view(request):
     return render(request, 'item_search.html', {'items_list' : result, 'items_count' : result.count(), 'query' : search_query})
 
 def item_borrow_view(request, pk):
-    template_name = 'item_borrow.html'
     
-
-    if (request.user.is_authenticated):
+    if (not request.user.is_authenticated):
         return redirect(reverse_lazy('login'))
 
     item = Item.objects.get(pk = pk)
     if (request.user == item.owner):
         return HttpResponseForbidden()
 
+    form = BorrowForm
     if request.method == 'POST':
-        form = BorrowForm
+        form = form(request.POST)
         if form.is_valid():
             new_borrow = Borrow(
                 quantity=1, 
@@ -90,37 +106,29 @@ def item_borrow_view(request, pk):
                 item_borrowed=item,
             )
             new_borrow.save()
-
-    return render(request, template_name, {'form': form})
-
-
-
-class ItemBorrowView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Borrow 
-    context_object_name = 'item'
-    fields = []
+        return redirect(reverse_lazy('items_list'))
     template_name = 'item_borrow.html'
-    def test_func(self):
-        return self.request.user != self.get_object().owner
-    def form_valid(self, form):
-        form.instance.borrower = self.request.user
-        return super().form_valid(form)
+    
+    return render(request, template_name, {'form': form, 'item' : item})
 
-class ItemReturnView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    model = Item
+
+
+class ItemReturnView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Borrow
     context_object_name = 'item'
     fields = []
     template_name = 'item_return.html'
+    success_url = reverse_lazy('items_list')
     def test_func(self):
-        return self.request.user == self.get_object().owner and self.get_object().borrower != None
-    def form_valid(self, form):
-        form.instance.borrower = None
-        return super().form_valid(form)
+        return self.request.user == self.get_object().item_borrowed.owner
 
 def item_borrowed_view(request):
-    result = Item.objects.filter(
+    result = Borrow.objects.filter(
         borrower=request.user
+    ).select_related(
+        'item_borrowed'
     )
-    return render(request, 'item_borrowed.html', {'items_list' : result})
+
+    return render(request, 'item_borrowed.html', {'borrow_list' : result})
 
 # Create your views here.

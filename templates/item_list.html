@@ -8,18 +8,13 @@
 </div>
 
 {% block content %}
-    <h2>My Items</h2>
+    <h2>Available Items</h2>
     {% for item in items_list %}
     <div class="card">
-        <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
         <div class="card-body d-flex flex-row">
             <div class="d-flex flex-column">
                 <a href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
-                {% if item.borrower %}
-                <p class="text-danger">Status: Borrowed by {{ item.borrower }}</p>
-                {% else %}
                 <p class="text-success">Status: Available</p>
-                {% endif %}
                 <p>{{ item.desc }}</p>
             </div>
             {% if item.borrower %}
@@ -29,19 +24,32 @@
             {% endif %}
         </div>
         <div class="card-footer">
-            {% if item.borrower %}
-            <a href="" class="btn dummy-update-button" role="button"
-                onclick="alert('You cant update an item that is currently being borrowed')" role="button">
-                Edit
-            </a>
-            {% else %}
             <a href="{% url 'item_update' item.pk %}" class="btn" role="button">Edit</a>
-            {% endif %}
             <a href="{% url 'item_delete' item.pk %}" class="btn" role="button">Delete</a>
         </div>
     </div>
     </br>
     {% empty %}
     <p>You don't have any item. <a href="{% url 'item_new' %}">Add an item</a> to begin lending your unused items!</p>
+    {% endfor %}
+    
+    <h2>Lent Item</h2>
+    {% for item in borrowed_item %}
+    <div class="card">
+        <div class="card-body d-flex flex-row">
+            <div class="d-flex flex-column">
+                <a href="{% url 'item_detail' item.item_borrowed.pk %}"><h4>{{ item.item_borrowed.name }}</h4></a>
+                <p class="text-danger">Status: Borrowed by {{ item.borrower }}</p>
+                <p>{{ item.desc }}</p>
+            </div>
+            <div class="d-flex ml-auto flex-column">
+                <a class="btn btn-danger" role="button" href="{% url 'item_return' item.pk %}">Mark as Returned</a>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'item_delete' item.item_borrowed.pk %}" class="btn" role="button">Delete</a>
+        </div>
+    </div>
+    </br>
     {% endfor %}
 {% endblock content %}
