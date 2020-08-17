@@ -23,17 +23,15 @@ def my_item_list(request):
             item_borrowed__in = my_items_id
         )
 
-        borrowed_objects = all_item_borrowed.select_related(
+        borrowed_item_records = all_item_borrowed.select_related(
                 'item_borrowed'
             )
-        print(borrowed_objects.query)
 
         available_items = my_items.filter(
             item_borrow_record__isnull=True
         )
-        print(available_items.query)
-        
-        return render(request, 'item_list.html', {'items_list': available_items, 'borrowed_item' : borrowed_objects})
+
+        return render(request, 'item_list.html', {'items_list': available_items, 'borrowed_item_records' : borrowed_item_records})
     else:
         return redirect(reverse_lazy('login'))
 
@@ -129,6 +127,6 @@ def item_borrowed_view(request):
         'item_borrowed'
     )
 
-    return render(request, 'item_borrowed.html', {'borrow_list' : result})
+    return render(request, 'item_borrowed.html', {'borrow_records' : result})
 
 # Create your views here.
