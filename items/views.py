@@ -50,7 +50,7 @@ def my_item_list(request):
     else:
         return redirect(reverse_lazy('login'))
 
-class ItemDetailView(LoginRequiredMixin, DetailView):
+class ItemDetailView(DetailView):
     context_object_name = 'item'
     model = Item
     template_name = 'item_detail.html'
@@ -103,8 +103,6 @@ def item_search_view(request):
         ).annotate(
             Sum('quantity')
         )
-
-    print(item_containing_query, borrowed_item)
 
     items_and_q = []
 

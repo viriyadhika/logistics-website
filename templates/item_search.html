@@ -18,7 +18,7 @@
                         {% if user.is_authenticated %}
                         <a href="{% url 'user_detail' item_and_q.item.owner.pk %}">{{ item_and_q.item.owner }}</a>
                         {% else %}
-                        {{ item_and_q.item.owner }}
+                        <a href="{% url 'login' %}">{{ item_and_q.item.owner }}</a>
                         {% endif %}
                     </p>
                     <p class="text-muted">Quantity Available: {{ item_and_q.available_quantity }}</p>
