@@ -11,10 +11,17 @@ from .forms import BorrowForm
 from .models import Item, Borrow
 
 def my_item_list(request):
-    class Item_and_Available:
+    class Item_and_Borrower:
         def __init__(self, item, available_quantity):
             self.item = item
             self.available_quantity = available_quantity
+            self.borrow = []
+
+        def add_borrow_record(self, borrow_record):
+            self.borrow.append(borrow_record)
+
+        def set_available_quantity(self, available_quantity):
+            self.available_quantity = available_quantity 
 
     if request.user.is_authenticated:
         borrowed_item_records = Borrow.objects.filter(
@@ -23,32 +30,82 @@ def my_item_list(request):
                 'item_borrowed'
             )
 
-        borrowed_item_aggregate = borrowed_item_records.values(
-                'item_borrowed'
-            ).annotate(
-                Sum('quantity')
+        my_items = list(
+                Item.objects.filter(
+                    owner=request.user
+                )
             )
 
-        my_items = Item.objects.filter(
-                owner = request.user
+        my_borrowed_items = list(
+                Borrow.objects.filter(
+                    item_borrowed__in = my_items
+                ).order_by(
+                    'return_date'
+                )
             )
-        available_items = []
 
+        result = []
 
-        for my_item in list(my_items):
+        for my_item in my_items:
             available_quantity = my_item.quantity
-            for a_borrowed_item in borrowed_item_aggregate.values('item_borrowed_id', 'quantity'):
-                if a_borrowed_item['item_borrowed_id'] == my_item.id:
-                    available_quantity = my_item.quantity - a_borrowed_item['quantity']
-                    break
-            if (available_quantity > 0):
-                available_items.append(Item_and_Available(my_item, available_quantity))
+            item_and_borrower = Item_and_Borrower(my_item, available_quantity)
+            for borrow_item in my_borrowed_items:
+                if borrow_item.item_borrowed == my_item:
+                    item_and_borrower.set_available_quantity(
+                        item_and_borrower.available_quantity - borrow_item.quantity
+                    )
+                    item_and_borrower.add_borrow_record(borrow_item)
+
+            result.append(item_and_borrower)
 
         return render(request, 'item_list.html', {
-            'items_with_q': available_items,
-            'borrowed_item_records' : borrowed_item_records})
+            'items_and_borrower': result,
+            'borrowed_item_records' : borrowed_item_records })
     else:
         return redirect(reverse_lazy('login'))
+
+
+
+
+# def my_item_list(request):
+#     class Item_and_Available:
+#         def __init__(self, item, available_quantity):
+#             self.item = item
+#             self.available_quantity = available_quantity
+
+#     if request.user.is_authenticated:
+#         borrowed_item_records = Borrow.objects.filter(
+#                 item_borrowed__owner = request.user
+#             ).select_related(
+#                 'item_borrowed'
+#             )
+
+#         borrowed_item_aggregate = borrowed_item_records.values(
+#                 'item_borrowed'
+#             ).annotate(
+#                 Sum('quantity')
+#             )
+
+#         my_items = Item.objects.filter(
+#                 owner = request.user
+#             )
+#         available_items = []
+
+
+#         for my_item in list(my_items):
+#             available_quantity = my_item.quantity
+#             for a_borrowed_item in borrowed_item_aggregate.values('item_borrowed_id', 'quantity'):
+#                 if a_borrowed_item['item_borrowed_id'] == my_item.id:
+#                     available_quantity = my_item.quantity - a_borrowed_item['quantity']
+#                     break
+#             if (available_quantity > 0):
+#                 available_items.append(Item_and_Available(my_item, available_quantity))
+
+#         return render(request, 'item_list.html', {
+#             'items_with_q': available_items,
+#             'borrowed_item_records' : borrowed_item_records})
+#     else:
+#         return redirect(reverse_lazy('login'))
 
 class ItemDetailView(DetailView):
     context_object_name = 'item'
@@ -113,9 +170,9 @@ def item_search_view(request):
                 continue
         available_quantity = an_item.quantity
         # Get the amount available
-        for a_borrowed_item in borrowed_item.values('item_borrowed_id', 'quantity'):
+        for a_borrowed_item in borrowed_item.values('item_borrowed_id', 'quantity__sum'):
             if a_borrowed_item['item_borrowed_id'] == an_item.id:
-                available_quantity = an_item.quantity - a_borrowed_item['quantity']
+                available_quantity = an_item.quantity - a_borrowed_item['quantity__sum']
                 break
         # Add to the list only if the item is available
         if (available_quantity > 0):

@@ -9,6 +9,43 @@
 
 {% block content %}
     <h2>Available Items</h2>
+    {% for item_and_borrower in items_and_borrower %}
+    <div class="card">
+        <div class="card-body d-flex flex-row">
+            <div class="d-flex flex-column">
+                <a href="{% url 'item_detail' item_and_borrower.item.pk %}"><h4>{{ item_and_borrower.item.name }}</h4></a>
+                <p class="text-success">Quantity Available: {{ item_and_borrower.available_quantity }}</p>
+                {% if item_and_borrower.borrow %}
+                <p class="text-danger">Item Borrow Record:</p>
+                <div class="container">
+                    <div class="row">
+                        {% for borrow in item_and_borrower.borrow %}
+                        <p class="col"><strong>Borrower</strong>: {{ borrow.borrower }}</br>
+                            <strong>Quantity</strong>: {{ borrow.quantity }} </br>
+                            <strong>Borrow Date</strong>: {{ borrow.borrow_date }} </br>
+                            <strong>Return Date</strong>: {{ borrow.return_date }}                     
+                        </p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted">None is currently borrowing this item</p>
+                {% endif %}
+                <p>{{ item_and_borrower.item.desc }}</p>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'item_update' item_and_borrower.item.pk %}" class="btn" role="button">Edit</a>
+            <a href="{% url 'item_delete' item_and_borrower.item.pk %}" class="btn" role="button">Delete</a>
+        </div>
+    </div>
+    </br>
+    {% empty %}
+    <p>You don't have any available item. <a href="{% url 'item_new' %}">Add an item</a> to lend your unused items!</p>
+    {% endfor %}
+
+
+    <!-- <h2>Available Items</h2>
     {% for item_with_q in items_with_q %}
     <div class="card">
         <div class="card-body d-flex flex-row">
@@ -28,9 +65,9 @@
     </br>
     {% empty %}
     <p>You don't have any available item. <a href="{% url 'item_new' %}">Add an item</a> to lend your unused items!</p>
-    {% endfor %}
+    {% endfor %} -->
     
-    <h2>Lent Item</h2>
+    <!-- <h2>Lent Item</h2>
     {% for borrowed_item_record in borrowed_item_records %}
     <div class="card">
         <div class="card-body d-flex flex-row">
@@ -51,5 +88,5 @@
     </br>
     {% empty %}
     <p>None is currently borrowing your item</p>
-    {% endfor %}
+    {% endfor %} -->
 {% endblock content %}
