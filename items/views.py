@@ -3,35 +3,50 @@ from django.views.generic import DetailView, ListView
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.http import HttpResponseForbidden
+from django.db.models.functions import Coalesce
 
 from .forms import BorrowForm
 from .models import Item, Borrow
 
 def my_item_list(request):
+    class Item_and_Available:
+        def __init__(self, item, available_quantity):
+            self.item = item
+            self.available_quantity = available_quantity
+
     if request.user.is_authenticated:
-        my_items = Item.objects.filter(
-            owner = request.user
-            )
-        
-        my_items_id = my_items.values_list(
-                'pk', flat=True
-            )
-
-        all_item_borrowed = Borrow.objects.filter(
-            item_borrowed__in = my_items_id
-        )
-
-        borrowed_item_records = all_item_borrowed.select_related(
+        borrowed_item_records = Borrow.objects.filter(
+                item_borrowed__owner = request.user
+            ).select_related(
                 'item_borrowed'
             )
 
-        available_items = my_items.filter(
-            item_borrow_record__isnull=True
-        )
+        borrowed_item_aggregate = borrowed_item_records.values(
+                'item_borrowed'
+            ).annotate(
+                Sum('quantity')
+            )
 
-        return render(request, 'item_list.html', {'items_list': available_items, 'borrowed_item_records' : borrowed_item_records})
+        my_items = Item.objects.filter(
+                owner = request.user
+            )
+        available_items = []
+
+
+        for my_item in list(my_items):
+            available_quantity = my_item.quantity
+            for a_borrowed_item in borrowed_item_aggregate.values('item_borrowed_id', 'quantity'):
+                if a_borrowed_item['item_borrowed_id'] == my_item.id:
+                    available_quantity = my_item.quantity - a_borrowed_item['quantity']
+                    break
+            if (available_quantity > 0):
+                available_items.append(Item_and_Available(my_item, available_quantity))
+
+        return render(request, 'item_list.html', {
+            'items_with_q': available_items,
+            'borrowed_item_records' : borrowed_item_records})
     else:
         return redirect(reverse_lazy('login'))
 
@@ -70,20 +85,48 @@ class ItemUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         return self.request.user == self.get_object().owner and num_of_item_borrow_rec == 0
 
 def item_search_view(request):
+    class Item_and_Quantity:
+        def __init__(self, item, available_quantity):
+            self.item = item
+            self.available_quantity = available_quantity
+
     search_query = request.GET.get('search_query')
     
-    result = Item.objects.filter(
-        Q(name__contains=search_query)
-        ).exclude(
-            item_borrow_record__isnull=False
+    item_containing_query = Item.objects.filter(
+            Q(name__contains=search_query)
         )
 
-    if request.user.is_authenticated:
-        result = result.exclude(
-                owner=request.user
-            )
+    borrowed_item = Borrow.objects.filter(
+            item_borrowed__in=item_containing_query
+        ).values(
+            'item_borrowed'
+        ).annotate(
+            Sum('quantity')
+        )
 
-    return render(request, 'item_search.html', {'items_list' : result, 'items_count' : result.count(), 'query' : search_query})
+    print(item_containing_query, borrowed_item)
+
+    items_and_q = []
+
+    for an_item in list(item_containing_query):
+        # Don't display if this item belong to the user himself
+        if request.user.is_authenticated:
+            if an_item.owner == request.user:
+                continue
+        available_quantity = an_item.quantity
+        # Get the amount available
+        for a_borrowed_item in borrowed_item.values('item_borrowed_id', 'quantity'):
+            if a_borrowed_item['item_borrowed_id'] == an_item.id:
+                available_quantity = an_item.quantity - a_borrowed_item['quantity']
+                break
+        # Add to the list only if the item is available
+        if (available_quantity > 0):
+            items_and_q.append(Item_and_Quantity(an_item, available_quantity))
+
+    return render(
+        request,
+        'item_search.html',
+        {'items_and_q' : items_and_q, 'items_count' : len(items_and_q), 'query' : search_query})
 
 def item_borrow_view(request, pk):
     
@@ -95,22 +138,34 @@ def item_borrow_view(request, pk):
         return HttpResponseForbidden()
 
     form = BorrowForm
+    error_msg = None
+
     if request.method == 'POST':
         form = form(request.POST)
         if form.is_valid():
-            print(form.cleaned_data['return_date'], 'hello')
             new_borrow = Borrow(
                 quantity=form.cleaned_data['quantity'], 
                 return_date=form.cleaned_data['return_date'],
                 borrower=request.user,
                 item_borrowed=item,
             )
-            new_borrow.save()
-        return redirect(reverse_lazy('items_list'))
+            
+            available_quantity = item.quantity - Borrow.objects.filter(
+                    item_borrowed=item
+                ).aggregate(
+                    total_borrowed=Coalesce(Sum('quantity'),0)
+                )['total_borrowed']
+            
+            if (form.cleaned_data['quantity'] <= available_quantity):
+                new_borrow.save()
+                return redirect(reverse_lazy('items_list'))
+            else:
+                error_msg = 'You borrowed too much item'
+
     template_name = 'item_borrow.html'
+    
 
-
-    return render(request, template_name, {'form': form, 'item' : item})
+    return render(request, template_name, {'form': form, 'item' : item, 'error_msg' : error_msg, 'item' : item})
 
 
 

@@ -11,5 +11,9 @@
         <button class="btn btn-success" type="submit">Borrow</button>
     </form>
 
+    {% if error_msg %}
+        <p class="text-danger">{{ error_msg }}</p>
+    {% endif %}
+
 {% endblock content %}
 

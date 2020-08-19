@@ -9,23 +9,20 @@
 
 {% block content %}
     <h2>Available Items</h2>
-    {% for item in items_list %}
+    {% for item_with_q in items_with_q %}
     <div class="card">
         <div class="card-body d-flex flex-row">
             <div class="d-flex flex-column">
-                <a href="{% url 'item_detail' item.pk %}"><h4>{{ item.name }}</h4></a>
-                <p class="text-success">Status: Available</p>
-                <p>{{ item.desc }}</p>
+                <a href="{% url 'item_detail' item_with_q.item.pk %}"><h4>{{ item_with_q.item.name }}</h4></a>
+                {% with key=item.pk %}
+                <p class="text-success">Available Quantity: {{ item_with_q.available_quantity }}</p>
+                {% endwith %}
+                <p>{{ item_with_q.item.desc }}</p>
             </div>
-            {% if item.borrower %}
-            <div class="d-flex ml-auto flex-column">
-                <a class="btn btn-danger" role="button" href="{% url 'item_return' item.pk %}">Mark as Returned</a>
-            </div>
-            {% endif %}
         </div>
         <div class="card-footer">
-            <a href="{% url 'item_update' item.pk %}" class="btn" role="button">Edit</a>
-            <a href="{% url 'item_delete' item.pk %}" class="btn" role="button">Delete</a>
+            <a href="{% url 'item_update' item_with_q.item.pk %}" class="btn" role="button">Edit</a>
+            <a href="{% url 'item_delete' item_with_q.item.pk %}" class="btn" role="button">Delete</a>
         </div>
     </div>
     </br>

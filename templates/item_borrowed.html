@@ -12,7 +12,7 @@
                 <div class="d-flex flex-column">
                     <a  href="{% url 'item_detail' borrow_record.item_borrowed.pk %}"><h4>{{ borrow_record.item_borrowed.name }}</h4></a>
                     <p class="text-muted">Borrowed from {{ borrow_record.item_borrowed.owner }} at {{ borrow_record.borrow_date }}</p>
-                    <p class="text-danger">Return Date: {{ borrowed_item_record.return_date }}</p>
+                    <p class="text-danger">Return Date: {{ borrow_record.return_date }}</p>
                     <p>{{ borrow_record.item_borrowed.desc }}</p>
                 </div>
             </div>
