@@ -15,23 +15,31 @@
             <div class="d-flex flex-column">
                 <a href="{% url 'item_detail' item_and_borrower.item.pk %}"><h4>{{ item_and_borrower.item.name }}</h4></a>
                 <p class="text-success">Quantity Available: {{ item_and_borrower.available_quantity }}</p>
-                {% if item_and_borrower.borrow %}
+                {% if item_and_borrower.borrow_and_overdues %}
                 <p class="text-danger">Item Borrow Record:</p>
                 <div class="container">
                     <div class="row">
-                        {% for borrow in item_and_borrower.borrow %}
+                        {% for borrow_and_overdue in item_and_borrower.borrow_and_overdues %}
                         <div class="col">
+                            {% if borrow_and_overdue.overdue %}
+                            <div class="card mb-3 p-3 bg-danger text-white">
+                            {% else %}
                             <div class="card mb-3 p-3">
+                            {% endif %}
                             <div class="row">
-                                <p class="col"><strong>Borrower</strong>: {{ borrow.borrower }}</br>
-                                    <strong>Quantity</strong>: {{ borrow.quantity }} </br>
-                                    <strong>Borrow Date</strong>: {{ borrow.borrow_date }} </br>
-                                    <strong>Return Date</strong>: {{ borrow.return_date }}                     
+                                <p class="col"><strong>Borrower</strong>: <a href="{% url 'user_detail' borrow_and_overdue.borrow.borrower.pk %}">{{ borrow_and_overdue.borrow.borrower }}</a></br>
+                                    <strong>Quantity</strong>: {{ borrow_and_overdue.borrow.quantity }} </br>
+                                    <strong>Borrow Date</strong>: {{ borrow_and_overdue.borrow.borrow_date }} </br>
+                                    <strong>Return Date</strong>: {{ borrow_and_overdue.borrow.return_date }}                     
                                 </p>
                             </div>
                             <div class="row">
                                 <div class="col">
-                                    <a href="{% url 'item_return' borrow.pk %}" role="button" class="btn btn-danger">Mark as Returned</a>
+                                    {% if borrow_and_overdue.overdue %}
+                                    <a href="{% url 'item_return' borrow_and_overdue.borrow.pk %}" role="button" class="btn bg-white">Mark as Returned</a>
+                                    {% else %}
+                                    <a href="{% url 'item_return' borrow_and_overdue.borrow.pk %}" role="button" class="btn btn-danger">Mark as Returned</a>
+                                    {% endif %}
                                 </div>
                             </div>
                             </div>
@@ -65,50 +73,4 @@
             alert("You can't update an item currently borrowed")
         })
     </script>
-
-
-    <!-- <h2>Available Items</h2>
-    {% for item_with_q in items_with_q %}
-    <div class="card">
-        <div class="card-body d-flex flex-row">
-            <div class="d-flex flex-column">
-                <a href="{% url 'item_detail' item_with_q.item.pk %}"><h4>{{ item_with_q.item.name }}</h4></a>
-                {% with key=item.pk %}
-                <p class="text-success">Available Quantity: {{ item_with_q.available_quantity }}</p>
-                {% endwith %}
-                <p>{{ item_with_q.item.desc }}</p>
-            </div>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'item_update' item_with_q.item.pk %}" class="btn" role="button">Edit</a>
-            <a href="{% url 'item_delete' item_with_q.item.pk %}" class="btn" role="button">Delete</a>
-        </div>
-    </div>
-    </br>
-    {% empty %}
-    <p>You don't have any available item. <a href="{% url 'item_new' %}">Add an item</a> to lend your unused items!</p>
-    {% endfor %} -->
-    
-    <!-- <h2>Lent Item</h2>
-    {% for borrowed_item_record in borrowed_item_records %}
-    <div class="card">
-        <div class="card-body d-flex flex-row">
-            <div class="d-flex flex-column">
-                <a href="{% url 'item_detail' borrowed_item_record.item_borrowed.pk %}"><h4>{{ borrowed_item_record.item_borrowed.name }}</h4></a>
-                <p class="text-muted">Status: Borrowed by {{ borrowed_item_record.borrower }} on {{ borrowed_item_record.borrow_date }}</p>
-                <p class="text-danger">Return Date: {{ borrowed_item_record.return_date }}</p>
-                <p>{{ borrowed_item_record.item_borrowed.desc }}</p>
-            </div>
-            <div class="d-flex ml-auto flex-column">
-                <a class="btn btn-danger" role="button" href="{% url 'item_return' borrowed_item_record.pk %}">Mark as Returned</a>
-            </div>
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'item_delete' borrowed_item_record.item_borrowed.pk %}" class="btn" role="button">Delete</a>
-        </div>
-    </div>
-    </br>
-    {% empty %}
-    <p>None is currently borrowing your item</p>
-    {% endfor %} -->
 {% endblock content %}

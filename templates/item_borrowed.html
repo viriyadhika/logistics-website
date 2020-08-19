@@ -5,13 +5,14 @@
 
     
 {% block content %}
-    {% for borrow_record in borrow_records %}
+    <h2>!!Overdue Items!!</h2>
+    {% for borrow_record in overdue_items %}
         <div class="card">
-            <!-- <img src="{{ item.image.url }}" class="card-img-top" alt="item image"> -->
             <div class="card-body d-flex flex-row align items-start">
                 <div class="d-flex flex-column">
                     <a  href="{% url 'item_detail' borrow_record.item_borrowed.pk %}"><h4>{{ borrow_record.item_borrowed.name }}</h4></a>
-                    <p class="text-muted">Borrowed from {{ borrow_record.item_borrowed.owner }} at {{ borrow_record.borrow_date }}</p>
+                    <p class="text-muted">Borrowed from <a href="{% url 'user_detail' borrow_record.item_borrowed.owner.pk %}">{{ borrow_record.item_borrowed.owner }}</a> at {{ borrow_record.borrow_date }}</p>
+                    <p class="text-muted">Quantity: {{ borrow_record.quantity }}</p>
                     <p class="text-danger">Return Date: {{ borrow_record.return_date }}</p>
                     <p>{{ borrow_record.item_borrowed.desc }}</p>
                 </div>
@@ -19,9 +20,29 @@
         </div>
         </br>
     {% empty %}
-    <h2>Empty</h2>
-    <p>You have not borrow any item. Use the search bar to start borrowing!</p>
+    <p>You have no overdue items :)</p>
     
     {% endfor %}
+
+    <h2>Borrowed Items</h2>
+    {% for borrow_record in items %}
+        <div class="card">
+            <div class="card-body d-flex flex-row align items-start">
+                <div class="d-flex flex-column">
+                    <a  href="{% url 'item_detail' borrow_record.item_borrowed.pk %}"><h4>{{ borrow_record.item_borrowed.name }}</h4></a>
+                    <p class="text-muted">Borrowed from <a href="{% url 'user_detail' borrow_record.item_borrowed.owner.pk %}">{{ borrow_record.item_borrowed.owner }}</a> at {{ borrow_record.borrow_date }}</br>
+                    Quantity: {{ borrow_record.quantity }}</p>
+                    <p class="text-danger">Return Date: {{ borrow_record.return_date }}</p>
+                    <p>{{ borrow_record.item_borrowed.desc }}</p>
+                </div>
+            </div>
+        </div>
+        </br>
+    {% empty %}
+    <p>You have no borrowed items</p>
+    {% endfor %}
+
+
+
     
 {% endblock content %}

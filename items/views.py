@@ -7,18 +7,27 @@ from django.db.models import Q, Sum
 from django.http import HttpResponseForbidden
 from django.db.models.functions import Coalesce
 
+from datetime import date
+
 from .forms import BorrowForm
 from .models import Item, Borrow
 
 def my_item_list(request):
+    # Encapsulate borrow and overdue together
+    # Overdue is a boolean representing whether the item is overdue
+    class Borrow_and_Overdue:
+        def __init__(self, borrow, overdue):
+            self.borrow = borrow
+            self.overdue = overdue
+
     class Item_and_Borrower:
         def __init__(self, item, available_quantity):
             self.item = item
             self.available_quantity = available_quantity
-            self.borrow = []
+            self.borrow_and_overdues = [] # Borrow_and_Overdue type
 
-        def add_borrow_record(self, borrow_record):
-            self.borrow.append(borrow_record)
+        def add_borrow_record(self, borrow_and_overdue):
+            self.borrow_and_overdues.append(borrow_and_overdue)
 
         def set_available_quantity(self, available_quantity):
             self.available_quantity = available_quantity 
@@ -54,7 +63,12 @@ def my_item_list(request):
                     item_and_borrower.set_available_quantity(
                         item_and_borrower.available_quantity - borrow_item.quantity
                     )
-                    item_and_borrower.add_borrow_record(borrow_item)
+
+                    item_and_borrower.add_borrow_record(
+                            Borrow_and_Overdue(
+                                borrow_item, borrow_item.return_date < date.today()
+                            )
+                        )
 
             result.append(item_and_borrower)
 
@@ -63,49 +77,6 @@ def my_item_list(request):
             'borrowed_item_records' : borrowed_item_records })
     else:
         return redirect(reverse_lazy('login'))
-
-
-
-
-# def my_item_list(request):
-#     class Item_and_Available:
-#         def __init__(self, item, available_quantity):
-#             self.item = item
-#             self.available_quantity = available_quantity
-
-#     if request.user.is_authenticated:
-#         borrowed_item_records = Borrow.objects.filter(
-#                 item_borrowed__owner = request.user
-#             ).select_related(
-#                 'item_borrowed'
-#             )
-
-#         borrowed_item_aggregate = borrowed_item_records.values(
-#                 'item_borrowed'
-#             ).annotate(
-#                 Sum('quantity')
-#             )
-
-#         my_items = Item.objects.filter(
-#                 owner = request.user
-#             )
-#         available_items = []
-
-
-#         for my_item in list(my_items):
-#             available_quantity = my_item.quantity
-#             for a_borrowed_item in borrowed_item_aggregate.values('item_borrowed_id', 'quantity'):
-#                 if a_borrowed_item['item_borrowed_id'] == my_item.id:
-#                     available_quantity = my_item.quantity - a_borrowed_item['quantity']
-#                     break
-#             if (available_quantity > 0):
-#                 available_items.append(Item_and_Available(my_item, available_quantity))
-
-#         return render(request, 'item_list.html', {
-#             'items_with_q': available_items,
-#             'borrowed_item_records' : borrowed_item_records})
-#     else:
-#         return redirect(reverse_lazy('login'))
 
 class ItemDetailView(DetailView):
     context_object_name = 'item'
@@ -236,10 +207,20 @@ class ItemReturnView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 def item_borrowed_view(request):
     result = Borrow.objects.filter(
         borrower=request.user
+    ).order_by(
+        'return_date'
     ).select_related(
         'item_borrowed'
     )
 
-    return render(request, 'item_borrowed.html', {'borrow_records' : result})
+    overdue_items = []
+    items = []
+    for borrow_record in result:
+        if borrow_record.return_date < date.today():
+            overdue_items.append(borrow_record)
+        else:
+            items.append(borrow_record)
+
+    return render(request, 'item_borrowed.html', {'overdue_items' : overdue_items, 'items' : items })
 
 # Create your views here.
