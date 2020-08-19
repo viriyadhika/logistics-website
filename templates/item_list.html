@@ -20,11 +20,22 @@
                 <div class="container">
                     <div class="row">
                         {% for borrow in item_and_borrower.borrow %}
-                        <p class="col"><strong>Borrower</strong>: {{ borrow.borrower }}</br>
-                            <strong>Quantity</strong>: {{ borrow.quantity }} </br>
-                            <strong>Borrow Date</strong>: {{ borrow.borrow_date }} </br>
-                            <strong>Return Date</strong>: {{ borrow.return_date }}                     
-                        </p>
+                        <div class="col">
+                            <div class="card mb-3 p-3">
+                            <div class="row">
+                                <p class="col"><strong>Borrower</strong>: {{ borrow.borrower }}</br>
+                                    <strong>Quantity</strong>: {{ borrow.quantity }} </br>
+                                    <strong>Borrow Date</strong>: {{ borrow.borrow_date }} </br>
+                                    <strong>Return Date</strong>: {{ borrow.return_date }}                     
+                                </p>
+                            </div>
+                            <div class="row">
+                                <div class="col">
+                                    <a href="{% url 'item_return' borrow.pk %}" role="button" class="btn btn-danger">Mark as Returned</a>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -35,7 +46,11 @@
             </div>
         </div>
         <div class="card-footer">
+            {% if item_and_borrower.borrow %}
+            <a id="dummy_update_button" href="" class="btn" role="button">Edit</a>
+            {% else %}
             <a href="{% url 'item_update' item_and_borrower.item.pk %}" class="btn" role="button">Edit</a>
+            {% endif %}
             <a href="{% url 'item_delete' item_and_borrower.item.pk %}" class="btn" role="button">Delete</a>
         </div>
     </div>
@@ -43,6 +58,13 @@
     {% empty %}
     <p>You don't have any available item. <a href="{% url 'item_new' %}">Add an item</a> to lend your unused items!</p>
     {% endfor %}
+
+    <script>
+        var dummy_update_button = document.getElementById('dummy_update_button')
+        dummy_update_button.addEventListener("click", function(){
+            alert("You can't update an item currently borrowed")
+        })
+    </script>
 
 
     <!-- <h2>Available Items</h2>
