@@ -6,8 +6,22 @@
 {% block content %}
     <div class="jumbotron">
         <h2>Welcome to Logistics Website!</h2>
-        <p>Here, you can borrow others' unused items and lend yours as well!</p>
-        <p>To start, for example, type "Laptop" in the search bar</p>
+        <p>In a corporate or an organization setting,
+            there are a lot of common items that
+            might not be used as often. When one
+            department is not using it, other
+            department should be able to borrow it.
+            This web application facilitate the
+            lending and borrowing process. To start, you can see what is currently available for you to borrow
+        </p>
+        <p>For instance, type "Laptop" in the search bar to search for a laptop to borrow
+        </p>
+
+        <p class="text-muted">
+        *Tips: If you type nothing ("") and press enter in the search bar, 
+        you will be presented with <strong>all</strong> available item!
+        </p>
+
         {% if user.is_authenticated %}
         <a href="{% url 'items_list' %}" class="btn btn-success" role="button">Get Started</a>
         {% else %}

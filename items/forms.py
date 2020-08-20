@@ -21,3 +21,15 @@ class BorrowForm(forms.Form):
         required=True,
         validators=[MinValueValidator(1)],
     )
+
+class ItemNewForm(forms.ModelForm):
+    class Meta:
+        model = Item
+        fields = ('name', 'desc', 'quantity')
+        labels = {
+            'name' : 'Item Name',
+            'desc' : 'Description',
+            'quantity' : 'Quantity',
+        }
+
+

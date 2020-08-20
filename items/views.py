@@ -9,7 +9,7 @@ from django.db.models.functions import Coalesce
 
 from datetime import date
 
-from .forms import BorrowForm
+from .forms import BorrowForm, ItemNewForm
 from .models import Item, Borrow
 
 def my_item_list(request):
@@ -86,7 +86,8 @@ class ItemDetailView(DetailView):
 class ItemCreateView(LoginRequiredMixin, CreateView):
     model = Item
     template_name = 'item_new.html'
-    fields = ['name', 'desc', 'quantity']
+    form_class = ItemNewForm
+    # fields = ['name', 'desc', 'quantity']
     def form_valid(self, form):
         form.instance.owner = self.request.user
         return super().form_valid(form)
